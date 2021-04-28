@@ -1,0 +1,8 @@
+storageprovider-home:
+  enabled: false
+
+storageprovider-users:
+  enabled: false
+
+storageprovider-shares:
+  enabled: false
