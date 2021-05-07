@@ -1,0 +1,34 @@
+apiVersion: v1
+entries:
+  storage-providers:
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2021-05-07T08:08:53.701347301Z"
+    dependencies:
+    - alias: home
+      condition: home.enabled
+      name: revad
+      repository: https://cs3org.github.io/charts
+      version: 1.2.3
+    - alias: users
+      condition: users.enabled
+      name: revad
+      repository: https://cs3org.github.io/charts
+      version: 1.2.3
+    - alias: shares
+      condition: shares.enabled
+      name: revad
+      repository: https://cs3org.github.io/charts
+      version: 1.2.3
+    description: CERNBox Storage Providers based in Revad to connect oCIS to EOS
+    digest: 73c54c676fc55d73fdb82bfadc0328c63995adb39a06e3a4a7ffba583b440f48
+    home: https://cernbox.web.ch
+    maintainers:
+    - email: samuel.alfageme.sainz@cern.ch
+      name: SamuAlfageme
+    name: storage-providers
+    type: application
+    urls:
+    - https://github.com/SamuAlfageme/cernboxcharts/releases/download/storage-providers-0.0.2/storage-providers-0.0.2.tgz
+    version: 0.0.2
+generated: "2021-05-07T08:08:53.512145833Z"
