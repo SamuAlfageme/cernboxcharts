@@ -1,8 +1,14 @@
-storageprovider-home:
+home:
   enabled: false
+  image:
+    tag: latest-eos
 
-storageprovider-users:
+users:
   enabled: false
+  image:
+    tag: latest-eos
 
-storageprovider-shares:
+shares:
   enabled: false
+  image:
+    tag: latest-eos
