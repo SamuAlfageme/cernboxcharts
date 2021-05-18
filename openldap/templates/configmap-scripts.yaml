@@ -1,0 +1,131 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "openldap.fullname" . }}-scripts
+  labels:
+    app: {{ template "openldap.name" . }}
+    chart: {{ template "openldap.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  addusers.sh: |-
+    #!/usr/bin/env bash
+
+    ###
+    USER_Ns=`seq 0 9`
+    ACTION_FILE='/tmp/action.ldif'
+    ldapadd_macro  () {
+      ldapadd -x -H $LDAP_URI -D $LDAP_ADMIN_BIND_DN -w $LDAP_ADMIN_BIND_PASSWORD -f $ACTION_FILE
+    }
+
+
+    ### Wait for the ldap server to be up and running
+    echo "Waiting for LDAP server to be ready..."
+    sleep 5
+    until ldapsearch -x -H $LDAP_URI -D $LDAP_ADMIN_BIND_DN -w $LDAP_ADMIN_BIND_PASSWORD -b $LDAP_BASE_DN &>/dev/null;
+    do
+      sleep 5
+    done
+
+
+    ### Create entries for dummy users on the ldap server
+    echo "Configuring demo users on LDAP server..."
+    for i in $USER_Ns;
+    do
+      # Make a ldif file for each user
+      user_no=$((1000+$i))
+      cat >$ACTION_FILE << EOF
+    dn: uid=user$i,$LDAP_BASE_DN
+    objectclass: top
+    objectclass: account
+    objectclass: unixAccount
+    cn: user$i
+    uid: user$i
+    uidNumber: $user_no
+    gidNumber: $user_no
+    homeDirectory: /home/user$i
+    loginShell: /bin/bash
+    gecos: user$i
+    userPassword: {crypt}x
+    EOF
+
+      #Add the user and set a password for her
+      ldapadd_macro
+      ldappasswd -x -H $LDAP_URI -D $LDAP_ADMIN_BIND_DN -w $LDAP_ADMIN_BIND_PASSWORD "uid=user$i,$LDAP_BASE_DN" -s "test$i"
+    done
+
+
+    ### Also add a dummy administrator
+    cat >$ACTION_FILE <<EOG
+    dn: uid=dummy_admin,$LDAP_BASE_DN
+    objectclass: top
+    objectclass: account
+    objectclass: unixAccount
+    cn: dummy_admin
+    uid: dummy_admin
+    uidNumber: 9999
+    gidNumber: 9999
+    homeDirectory: /home/dummy_admin
+    loginShell: /bin/bash
+    gecos: dummy_admin
+    userPassword: {crypt}x
+    EOG
+    ldapadd_macro
+    ldappasswd -x -H $LDAP_URI -D $LDAP_ADMIN_BIND_DN -w $LDAP_ADMIN_BIND_PASSWORD "uid=dummy_admin,$LDAP_BASE_DN" -s "adminadmin"
+
+
+    ### Create user groups
+
+    # Create Organizational Unit
+    echo "Creating groups branch..."
+    cat >$ACTION_FILE <<EOM
+    dn: ou=groups,$LDAP_BASE_DN
+    ou: groups
+    description: Generic Groups Branch
+    objectclass: top
+    objectclass: organizationalunit
+    EOM
+    ldapadd_macro
+
+    # Create groups
+    echo "Creating groups..."
+    for i in 1 2; do
+      cat <<EON
+    dn: cn=group$i,ou=groups,$LDAP_BASE_DN
+    objectClass: top
+    objectClass: posixGroup
+    gidNumber: 300$i
+
+    EON
+    done > $ACTION_FILE
+    ldapadd_macro
+
+    # Split users into groups
+    for u in $USER_Ns;
+    do
+      if [ $u -lt 5 ]; then
+        GROUP="1"
+      else
+        GROUP="2"
+      fi
+      cat <<EOP
+    dn: cn=group$GROUP,ou=groups,$LDAP_BASE_DN
+    changetype: modify
+    add: memberuid
+    memberuid: user$u
+
+    EOP
+    done >$ACTION_FILE
+    ldapmodify -x -H $LDAP_URI -D $LDAP_ADMIN_BIND_DN -w $LDAP_ADMIN_BIND_PASSWORD -f $ACTION_FILE
+
+
+    ### Clean up
+    rm -f $ACTION_FILE
+
+
+    ### Removing the lock for EOS-Storage
+    if [ "$DEPLOYMENT_TYPE" == "compose" ]; then
+      echo "Unlocking eos-mgm configuration for EOS-Storage deployment."
+      rm $HOST_FOLDER/eos-mgm-lock
+      echo "I'm done. Exiting..."
+    fi
