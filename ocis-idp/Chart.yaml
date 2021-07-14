@@ -2,7 +2,7 @@ apiVersion: v2
 name: ocis
 description: ownCloud Infinite Scale
 type: application
-version: 0.0.1
+version: 0.0.2
 appVersion: 0.0.1
 icon: https://owncloud.github.io/media/is.png
 home: https://owncloud.github.io/

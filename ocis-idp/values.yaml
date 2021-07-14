@@ -25,6 +25,7 @@ env:
   IDP_LDAP_UUID_ATTRIBUTE: "uid"
   IDP_LDAP_UUID_ATTRIBUTE_TYPE: "text"
   IDP_LDAP_FILTER: "(objectClass=posixaccount)"
+  IDP_IDENTIFIER_REGISTRATION_CONF: /etc/ocis/identifier_registration.yaml
 
 extraEnv: []
 
@@ -38,28 +39,15 @@ entrypoint:
     - "ocis idp"
     - "ocis glauth"
 
-# configFiles:
-#   storage-registry-rules.json: |
-#     {
-#       "/Shares":{
-#           "aliases":{
-#             "/Shares-[abcdefghijklmnopqrstuvwxyz]":"storageprovider-shares:14000"
-#           },
-#           "mapping":"/Shares-{{substr 0 1 .Id.OpaqueId}}"
-#       },
-#       "/home":{
-#           "aliases":{
-#             "/home-[abcdefghijklmnopqrstuvwxyz]":"storageprovider-home:18000"
-#           },
-#           "mapping":"/home-{{substr 0 1 .Id.OpaqueId}}"
-#       },
-#       "/eos/user/[abcdefghijklmnopqrstuvwxyz]":{
-#           "address":"storageprovider-users:16000"
-#       },
-#       "/public":{
-#           "address":"localhost:9178"
-#       }
-#     }
+configFiles:
+  identifier_registration.yaml: |
+    clients:
+      - id: swan
+        secret: KFeFWWEZO9TkisIQzR3fo7hfiMXlOpaqP8CFuTbSHzV1TUuGECglPxpiVKJfOXIx
+        name: SWAN
+        application_type: native
+        redirect_uris:
+          - https://ocis-idp.local
 
 persistentVolume:
   ## If true, ocis will create/use a Persistent Volume Claim
