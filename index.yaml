@@ -3,6 +3,18 @@ entries:
   ocis:
   - apiVersion: v2
     appVersion: 0.0.1
+    created: "2021-07-14T13:27:52.753226907Z"
+    description: ownCloud Infinite Scale
+    digest: a1e32ac8f75436dbbe9ca21b39d980da96920362710b5a35cbc737d6b5c211d8
+    home: https://owncloud.github.io/
+    icon: https://owncloud.github.io/media/is.png
+    name: ocis
+    type: application
+    urls:
+    - https://github.com/SamuAlfageme/cernboxcharts/releases/download/ocis-0.0.2/ocis-0.0.2.tgz
+    version: 0.0.2
+  - apiVersion: v2
+    appVersion: 0.0.1
     created: "2021-06-01T15:22:03.355470442Z"
     description: ownCloud Infinite Scale
     digest: e8a36f66b2474f127688d7939c14e774233c87265f26adad2db2704f80ae3ed3
